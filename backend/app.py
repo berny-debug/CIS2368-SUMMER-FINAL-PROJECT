@@ -9,6 +9,48 @@ con = DBConnection(creds.connectionstring, creds.username, creds.password, creds
 LOGIN_USER = "admin"
 LOGIN_PASS = "admin123"
 
+
+def initialize_database():
+    # Create the required tables automatically if they do not already exist
+    schema_statements = [
+        """
+        CREATE TABLE IF NOT EXISTS floor (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            level INT NOT NULL,
+            name VARCHAR(255) NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS room (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            capacity INT NOT NULL,
+            number INT NOT NULL,
+            floor INT NOT NULL,
+            FOREIGN KEY (floor) REFERENCES floor(id) ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS resident (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            firstname VARCHAR(255) NOT NULL,
+            lastname VARCHAR(255) NOT NULL,
+            age INT NOT NULL,
+            room INT NOT NULL,
+            FOREIGN KEY (room) REFERENCES room(id) ON DELETE CASCADE
+        )
+        """
+    ]
+
+    for statement in schema_statements:
+        success, error = execute_query(con, statement)
+        if not success:
+            print("Schema initialization failed:", error)
+            return False
+    return True
+
+
+initialize_database()
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
@@ -40,12 +82,12 @@ def create_floor():
     
     query = "INSERT INTO floor (level, name) VALUES (%s, %s)"
     params = (level, name)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Floor created"}), 201
     else:
-        return jsonify({"error": "Failed to create floor"}), 500
+        return jsonify({"error": error or "Failed to create floor"}), 500
 
 @app.route("/floors/<int:floor_id>", methods=["PUT"])
 def update_floor(floor_id):
@@ -59,23 +101,23 @@ def update_floor(floor_id):
     
     query = "UPDATE floor SET level = %s, name = %s WHERE id = %s"
     params = (level, name, floor_id)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Floor updated"}), 200
     else:
-        return jsonify({"error": "Failed to update floor"}), 500
+        return jsonify({"error": error or "Failed to update floor"}), 500
 
 @app.route("/floors/<int:floor_id>", methods=["DELETE"])
 def delete_floor(floor_id):
     query = "DELETE FROM floor WHERE id = %s"
     params = (floor_id,)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Floor deleted"}), 200
     else:
-        return jsonify({"error": "Failed to delete floor"}), 500
+        return jsonify({"error": error or "Failed to delete floor"}), 500
 
 @app.route("/rooms", methods=["GET"])
 def get_rooms():
@@ -114,12 +156,12 @@ def create_room():
     
     query = "INSERT INTO room (capacity, number, floor) VALUES (%s, %s, %s)"
     params = (capacity, number, floor_id)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Room created"}), 201
     else:
-        return jsonify({"error": "Failed to create room"}), 500
+        return jsonify({"error": error or "Failed to create room"}), 500
 
 @app.route("/rooms/<int:room_id>", methods=["PUT"])
 def update_room(room_id):
@@ -148,23 +190,23 @@ def update_room(room_id):
     
     query = "UPDATE room SET capacity = %s, number = %s, floor = %s WHERE id = %s"
     params = (capacity, number, floor_id, room_id)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Room updated"}), 200
     else:
-        return jsonify({"error": "Failed to update room"}), 500
+        return jsonify({"error": error or "Failed to update room"}), 500
 
 @app.route("/rooms/<int:room_id>", methods=["DELETE"])
 def delete_room(room_id):
     query = "DELETE FROM room WHERE id = %s"
     params = (room_id,)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Room deleted"}), 200
     else:
-        return jsonify({"error": "Failed to delete room"}), 500
+        return jsonify({"error": error or "Failed to delete room"}), 500
 
 @app.route("/residents", methods=["GET"])
 def get_residents():
@@ -197,12 +239,12 @@ def create_resident():
     
     query = "INSERT INTO resident (firstname, lastname, age, room) VALUES (%s, %s, %s, %s)"
     params = (firstname, lastname, age, room_id)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Resident created"}), 201
     else:
-        return jsonify({"error": "Failed to create resident"}), 500
+        return jsonify({"error": error or "Failed to create resident"}), 500
 
 @app.route("/residents/<int:resident_id>", methods=["PUT"])
 def update_resident(resident_id):
@@ -225,23 +267,23 @@ def update_resident(resident_id):
     
     query = "UPDATE resident SET firstname = %s, lastname = %s, age = %s, room = %s WHERE id = %s"
     params = (firstname, lastname, age, room_id, resident_id)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Resident updated"}), 200
     else:
-        return jsonify({"error": "Failed to update resident"}), 500
+        return jsonify({"error": error or "Failed to update resident"}), 500
 
 @app.route("/residents/<int:resident_id>", methods=["DELETE"])
 def delete_resident(resident_id):
     query = "DELETE FROM resident WHERE id = %s"
     params = (resident_id,)
-    success = execute_query(con, query, params)
+    success, error = execute_query(con, query, params)
     
     if success:
         return jsonify({"message": "Resident deleted"}), 200
     else:
-        return jsonify({"error": "Failed to delete resident"}), 500
+        return jsonify({"error": error or "Failed to delete resident"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

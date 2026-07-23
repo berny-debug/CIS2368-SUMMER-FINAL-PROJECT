@@ -32,7 +32,12 @@ def execute_read_query(con, query, params=None):
 
 def execute_query(con, query, params=None):
     """Execute INSERT/UPDATE/DELETE query with optional parameters for safe queries"""
-    cursor=con.cursor()
+    # Return the real error message to the API layer when a write fails
+    if con is None:
+        print("Database connection is not available")
+        return False, "Database connection is not available"
+
+    cursor = con.cursor()
     try:
         if params:
             cursor.execute(query, params)
@@ -40,7 +45,15 @@ def execute_query(con, query, params=None):
             cursor.execute(query)
         con.commit()
         print("DB is updated")
-        return True
+        return True, None
     except Error as e:
+        con.rollback()
         print("Error is:", e)
-        return False
+        return False, str(e)
+    except Exception as e:
+        if con is not None:
+            con.rollback()
+        print("Error is:", e)
+        return False, str(e)
+    finally:
+        cursor.close()
