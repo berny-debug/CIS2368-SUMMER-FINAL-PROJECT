@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Residents</title>
+  <style>
+    :root { --navy:#12344d; --blue:#2f6f9f; --light:#f5f7fa; --text:#243447; --danger:#c94b4b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI", Arial, sans-serif; background:#f7fafc; color:var(--text); }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 48px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .nav a { color:var(--blue); text-decoration:none; margin-left:12px; font-weight:600; }
+    .panel { background:white; border-radius:16px; padding:24px; box-shadow:0 12px 30px rgba(18,52,77,0.08); margin-bottom:20px; }
+    h1 { margin:0 0 8px; color:var(--navy); }
+    .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); align-items:end; }
+    input, button, select { width:100%; padding:11px 12px; border-radius:10px; border:1px solid #d8e2ec; font-size:1rem; }
+    button { background:var(--blue); color:white; border:none; cursor:pointer; font-weight:600; }
+    button.secondary { background:#eef4fa; color:var(--navy); }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { padding:12px; border-bottom:1px solid #e7ecf2; text-align:left; }
+    th { background:#f5f8fb; color:#42576b; }
+    .error { color:var(--danger); background:#fdeaea; padding:10px; border-radius:8px; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div>
+        <h1>Residents</h1>
+        <p>Track residents and their assigned rooms.</p>
+      </div>
+      <div class="nav">
+        <a href="/floors">Floors</a>
+        <a href="/rooms">Rooms</a>
+      </div>
+    </div>
+    <% if (typeof error !== 'undefined' && error) { %><div class="error"><%= error %></div><% } %>
+    <div class="panel">
+      <form method="POST" action="/residents">
+        <div class="grid">
+          <div><input name="firstname" placeholder="First Name" required /></div>
+          <div><input name="lastname" placeholder="Last Name" required /></div>
+          <div><input name="age" placeholder="Age" required /></div>
+          <div>
+            <select name="room" required>
+              <% rooms.forEach(function(room) { %>
+                <option value="<%= room.id %>"><%= room.number %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div><button type="submit">Add Resident</button></div>
+        </div>
+      </form>
+    </div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>First Name</th><th>Last Name</th><th>Age</th><th>Room</th><th>Action</th></tr></thead>
+        <tbody>
+          <% items.forEach(function(item) { %>
+            <tr>
+              <td><%= item.firstname %></td>
+              <td><%= item.lastname %></td>
+              <td><%= item.age %></td>
+              <td><%= item.room %></td>
+              <td>
+                <form method="POST" action="/residents/<%= item.id %>/delete" style="display:inline">
+                  <button class="secondary" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

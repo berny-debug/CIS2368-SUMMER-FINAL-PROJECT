@@ -208,6 +208,27 @@ def delete_room(room_id):
     else:
         return jsonify({"error": error or "Failed to delete room"}), 500
 
+@app.route("/rooms/<int:room_id>/residents", methods=["GET"])
+def get_room_residents(room_id):
+    room_rows = execute_read_query(con, "SELECT id, capacity, number, floor FROM room WHERE id = %s", (room_id,))
+    if not room_rows:
+        return jsonify({"error": "Room does not exist"}), 404
+
+    resident_rows = execute_read_query(con, "SELECT id, firstname, lastname, age, room FROM resident WHERE room = %s ORDER BY id", (room_id,))
+    return jsonify({"room": room_rows[0], "residents": resident_rows}), 200
+
+@app.route("/stats", methods=["GET"])
+def get_stats():
+    floor_count = execute_read_query(con, "SELECT COUNT(*) AS count FROM floor")
+    room_count = execute_read_query(con, "SELECT COUNT(*) AS count FROM room")
+    resident_count = execute_read_query(con, "SELECT COUNT(*) AS count FROM resident")
+
+    return jsonify({
+        "floor_count": floor_count[0]["count"] if floor_count else 0,
+        "room_count": room_count[0]["count"] if room_count else 0,
+        "resident_count": resident_count[0]["count"] if resident_count else 0,
+    }), 200
+
 @app.route("/residents", methods=["GET"])
 def get_residents():
     rows = execute_read_query(con, "SELECT id, firstname, lastname, age, room FROM resident ORDER BY id")

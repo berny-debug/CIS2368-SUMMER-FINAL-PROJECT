@@ -26,3 +26,7 @@ GET /residents/<id> - Get specific resident
 POST /residents - Create resident (firstname, lastname, age, room)
 PUT /residents/<id> - Update resident (firstname, lastname, age, room)
 DELETE /residents/<id> - Delete resident
+
+## Sprint 2 Enhancements
+GET /rooms/<id>/residents - Get a room and all residents assigned to it
+GET /stats - Get summary counts for floors, rooms, and residents
