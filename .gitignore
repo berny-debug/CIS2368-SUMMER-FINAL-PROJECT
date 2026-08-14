@@ -1,3 +1,4 @@
+# Python bytecode and virtual environments
 __pycache__/
 *.pyc
 *.pyo
@@ -11,6 +12,12 @@ build/
 venv/
 env/
 .env
+
+# Frontend dependency folders
+node_modules/
+frontend/node_modules/
+
+# Editor and OS files
 .DS_Store
 *.log
 .idea/

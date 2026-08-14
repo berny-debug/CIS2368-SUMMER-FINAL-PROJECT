@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const axios = require('axios');
 
+// Frontend server for the EJS interface that talks to the Flask API.
 const app = express();
 const port = process.env.PORT || 3000;
 const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000';
@@ -12,8 +13,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Route: landing page for the login screen.
 app.get('/', (req, res) => res.render('login'));
 
+// Authenticate the user against the Flask backend before allowing access.
 app.post('/login', async (req, res) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/login`, {

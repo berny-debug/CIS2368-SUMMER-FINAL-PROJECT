@@ -51,6 +51,7 @@ def initialize_database():
 
 initialize_database()
 
+# Basic authentication gate for the management application.
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
@@ -129,6 +130,7 @@ def get_room(room_id):
     rows = execute_read_query(con, "SELECT id, capacity, number, floor FROM room WHERE id = %s", (room_id,))
     return jsonify(rows[0] if rows else {}), 200 if rows else 404
 
+# Room creation enforces a floor-based numbering rule so room numbers stay organized.
 @app.route("/rooms", methods=["POST"])
 def create_room():
     data = request.get_json(silent=True) or {}
