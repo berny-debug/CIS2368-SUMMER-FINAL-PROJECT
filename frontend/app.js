@@ -80,7 +80,13 @@ app.get('/residents', async (req, res) => {
       axios.get(`${API_BASE_URL}/residents`),
       axios.get(`${API_BASE_URL}/rooms`),
     ]);
-    res.render('residents', { items: residentsResponse.data, rooms: roomsResponse.data, title: 'Residents' });
+    const hasRooms = Array.isArray(roomsResponse.data) && roomsResponse.data.length > 0;
+    res.render('residents', {
+      items: residentsResponse.data,
+      rooms: roomsResponse.data,
+      title: 'Residents',
+      error: hasRooms ? undefined : 'Create a room before adding a resident.'
+    });
   } catch (error) {
     res.render('residents', { items: [], rooms: [], title: 'Residents', error: 'Could not load residents' });
   }
